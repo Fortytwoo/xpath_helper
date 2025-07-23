@@ -41,7 +41,12 @@ var evaluateQuery = function() {
     'type': 'evaluate',
     'query': queryEl.value
   };
-  chrome.extension.sendMessage(request);
+  chrome.runtime.sendMessage(request, function(response) {
+    // 处理响应（如果需要）
+    if (chrome.runtime.lastError) {
+      // 忽略错误
+    }
+  });
 };
 
 var handleRequest = function(request, sender, callback) {
@@ -55,6 +60,11 @@ var handleRequest = function(request, sender, callback) {
       nodeCountText.nodeValue = request['results'][1];
     }
   }
+  // 确保调用回调
+  if (callback) {
+    callback();
+  }
+  return true; // 表明我们会异步响应
 };
 
 var handleMouseMove = function(e) {
@@ -68,13 +78,23 @@ var handleMouseMove = function(e) {
     mostRecentRelocateTimeInMs = timeInMs;
 
     // Tell content script to move iframe to a different part of the screen.
-    chrome.extension.sendMessage({'type': 'relocateBar'});
+    chrome.runtime.sendMessage({'type': 'relocateBar'}, function(response) {
+      // 处理响应（如果需要）
+      if (chrome.runtime.lastError) {
+        // 忽略错误
+      }
+    });
   }
 };
 
 var handleKeyDown = function(e) {
   if (e.keyCode === X_KEYCODE && e.ctrlKey && e.shiftKey) {
-    chrome.extension.sendMessage({'type': 'hideBar'});
+    chrome.runtime.sendMessage({'type': 'hideBar'}, function(response) {
+      // 处理响应（如果需要）
+      if (chrome.runtime.lastError) {
+        // 忽略错误
+      }
+    });
   }
 };
 
@@ -87,10 +107,15 @@ document.addEventListener('mousemove', handleMouseMove);
 // steal focus and hide bar.
 document.addEventListener('keydown', handleKeyDown);
 
-chrome.extension.onMessage.addListener(handleRequest);
+chrome.runtime.onMessage.addListener(handleRequest);
 
 var request = {
   'type': 'height',
   'height': document.documentElement.offsetHeight
 };
-chrome.extension.sendMessage(request);
+chrome.runtime.sendMessage(request, function(response) {
+  // 处理响应（如果需要）
+  if (chrome.runtime.lastError) {
+    // 忽略错误
+  }
+});

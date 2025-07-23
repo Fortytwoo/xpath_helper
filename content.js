@@ -168,10 +168,10 @@ xh.Bar = function() {
   this.boundMouseMove_ = xh.bind(this, this.mouseMove_);
   this.boundKeyDown_ = xh.bind(this, this.keyDown_);
 
-  chrome.extension.onMessage.addListener(this.boundHandleRequest_);
+  chrome.runtime.onMessage.addListener(this.boundHandleRequest_);
 
   this.barFrame_ = document.createElement('iframe');
-  this.barFrame_.src = chrome.extension.getURL('bar.html');
+  this.barFrame_.src = chrome.runtime.getURL('bar.html');
   this.barFrame_.id = 'xh-bar';
   this.barFrame_.className = 'top';
   this.barFrame_.style.height = '0';
@@ -207,7 +207,11 @@ xh.Bar.prototype.updateBar_ = function(update_query) {
     'query': update_query ? this.query_ : null,
     'results': results
   };
-  chrome.extension.sendMessage(request);
+  chrome.runtime.sendMessage(request, function(response) {
+    if (chrome.runtime.lastError) {
+      // 忽略错误
+    }
+  });
 };
 
 xh.Bar.prototype.showBar_ = function() {
@@ -244,6 +248,12 @@ xh.Bar.prototype.handleRequest_ = function(request, sender, callback) {
     this.hideBar_();
     window.focus();
   }
+  
+  // 确保调用回调
+  if (callback) {
+    callback();
+  }
+  return true; // 表明我们会异步响应
 };
 
 xh.Bar.prototype.mouseMove_ = function(e) {
