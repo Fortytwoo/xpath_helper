@@ -21,8 +21,17 @@
 
 'use strict';
 
+// Service Worker activation
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activated');
+});
+
 function handleRequest(request, sender, callback) {
   // Simply relay the request. This lets content.js talk to bar.js.
   chrome.tabs.sendMessage(sender.tab.id, request, callback);
+  // 保持消息通道开放
+  return true;
 }
-chrome.extension.onMessage.addListener(handleRequest);
+
+// 使用新的runtime.onMessage API替代extension.onMessage
+chrome.runtime.onMessage.addListener(handleRequest);
